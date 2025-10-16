@@ -1,27 +1,37 @@
-import mysql.connector as conn
+from supabase import create_client
 from dotenv import load_dotenv
-from essentials.parser import parser
+from parser import parser
+from check_env import check_env
 import os
 
 load_dotenv()
 
-mydb = conn.connect(
-  host = os.getenv('DB_HOST'),
-  user = os.getenv('DB_USER'),
-  passwd = os.getenv('DB_PASS')
-)
+@check_env
+def add_compound():
+  supabase = create_client(
+    os.environ.get('DB_URL'), #type: ignore
+    os.environ.get('DB_KEY')  #type: ignore
+  )
 
-mycursor = mydb.cursor()
-mycursor.execute('USE atomix')
+  formulae = []
+  while True:
+    formula = input('Enter formula (q to quit): ')
+    if formula.lower() == 'q': break
+    iupac = input('IUPAC Name: ')
 
-forms = ''
-while True:
-  s = input('Enter formula (q to quit): ')
-  if s.lower() == 'q': break
-  forms += ('("' + parser(s) + '"),')
+    formulae.append({
+      'formula': parser(formula),
+      'iupac': iupac
+    })
 
-forms = forms[:-1]
+  if formulae == []:
+    raise ValueError('No formulae added.')
 
-q_string = f'INSERT INTO compounds (formula) VALUES {forms}'
-mycursor.execute(q_string)
-mydb.commit()
+  response = (
+    supabase.table('compounds')
+      .insert(formulae)
+      .execute()
+  )
+
+if __name__ == '__main__':
+  add_compound()
