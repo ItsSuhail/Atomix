@@ -8,7 +8,12 @@ pygame.display.set_caption('Atomix')
 
 # Game states
 MENU = "menu" #initial state
+PLAY = "play"
 ABOUT = "about"
+
+# Current state
+state = MENU
+
 
 # Initializing fonts
 text_font_1 = pygame.font.Font('assets/fonts/font1.ttf',60)
@@ -70,12 +75,26 @@ def game():
     cursor_rect.center = pygame.mouse.get_pos()
     screen.blit(cursor_image,cursor_rect)
 
+
 while (True):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-    menu()
-    
+    if state == MENU:
+        menu()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONUP:
+                if play_rect.collidepoint(pygame.mouse.get_pos()):
+                    state = PLAY
+                elif about_rect.collidepoint(pygame.mouse.get_pos()):
+                    state = ABOUT
+                elif exit_rect.collidepoint(pygame.mouse.get_pos()):
+                    pygame.quit()
+                    exit()
+                
+    if state == PLAY:
+        game()
+
     pygame.display.update()
     clock.tick(60) #Sets maximum frame rate (ceiling)
