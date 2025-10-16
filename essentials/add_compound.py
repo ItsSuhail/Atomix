@@ -1,5 +1,6 @@
 import mysql.connector as conn
 from dotenv import load_dotenv
+from essentials.parser import parser
 import os
 
 load_dotenv()
@@ -13,15 +14,11 @@ mydb = conn.connect(
 mycursor = mydb.cursor()
 mycursor.execute('USE atomix')
 
-def format_formula(s):
-  # TODO: Format formula for storing in db
-  return s
-
 forms = ''
 while True:
   s = input('Enter formula (q to quit): ')
   if s.lower() == 'q': break
-  forms += ('("' + format_formula(s) + '"),')
+  forms += ('("' + parser(s) + '"),')
 
 forms = forms[:-1]
 

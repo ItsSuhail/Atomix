@@ -1,5 +1,5 @@
-
-ELEMENTS = {'H': 1,
+ELEMENTS = {
+'H': 1,
 'He': 2,
 'Li': 3,
 'Be': 4,
@@ -121,63 +121,63 @@ ELEMENTS = {'H': 1,
 'Q':120
 }
 
-str = ""
-compound = input("Compound: ")
-compound = compound.replace('(', 'J')
-compound = compound.replace(')','Q')
-# print(compound)
-compound = list(compound)
-jump = -1
-for i in range(len(compound)):
-    if i<jump:
-        continue
-    if i+2<=len(compound)-1:
-        if compound[i].isalpha() and compound[i+1].isalpha():
-            
-            if compound[i+1].islower():
-                str+=f"{ELEMENTS[f'{compound[i]}{compound[i+1]}']}#"
-            elif compound[i+1].isupper():
-                str+=f"{ELEMENTS[f'{compound[i]}']}"
-                str+="#1_"+f"{ELEMENTS[compound[i+1]]}#"
-            if compound[i+2].isalpha():
-                str+="1"
-                jump=i+2
+def parser(s):
+    str = ""
+    compound = s
+    compound = compound.replace('(', 'J')
+    compound = compound.replace(')','Q')
+    compound = list(compound)
+    jump = -1
+    for i in range(len(compound)):
+        if i<jump:
+            continue
+        if i+2<=len(compound)-1:
+            if compound[i].isalpha() and compound[i+1].isalpha():
+                
+                if compound[i+1].islower():
+                    str+=f"{ELEMENTS[f'{compound[i]}{compound[i+1]}']}#"
+                elif compound[i+1].isupper():
+                    str+=f"{ELEMENTS[f'{compound[i]}']}"
+                    str+="#1_"+f"{ELEMENTS[compound[i+1]]}#"
+                if compound[i+2].isalpha():
+                    str+="1"
+                    jump=i+2
+                else:
+                    str+=compound[i+2]
+                    jump = i+3
+                str+="_"
+                
+                
+            elif compound[i].isalpha() and compound[i+1].isnumeric():
+                str+=f"{ELEMENTS[compound[i]]}#" + compound[i+1]+"_"
+                jump = i+2
+
             else:
-                str+=compound[i+2]
-                jump = i+3
-            str+="_"
-            
-            
-        elif compound[i].isalpha() and compound[i+1].isnumeric():
-            str+=f"{ELEMENTS[compound[i]]}#" + compound[i+1]+"_"
-            jump = i+2
-
-        else:
-            str += compound[i]
-            jump = i+1
-    
-    elif i == len(compound) - 2:
-        if compound[i].isalpha() and compound[i+1].isalpha():
-            if compound[i+1].islower():
-                str+=f"{ELEMENTS[f'{compound[i]}{compound[i+1]}']}#1"
-            elif compound[i+1].isupper():
-                str+=f"{ELEMENTS[f'{compound[i]}']}"
-                str+="#1_"+f"{ELEMENTS[compound[i+1]]}#1"
+                str += compound[i]
+                jump = i+1
         
-        elif compound[i].isalpha() and compound[i+1].isnumeric():
-            str+=f"{ELEMENTS[f'{compound[i]}']}#" + compound[i+1]
-            str+="_"
-        
-        jump=i+2
+        elif i == len(compound) - 2:
+            if compound[i].isalpha() and compound[i+1].isalpha():
+                if compound[i+1].islower():
+                    str+=f"{ELEMENTS[f'{compound[i]}{compound[i+1]}']}#1"
+                elif compound[i+1].isupper():
+                    str+=f"{ELEMENTS[f'{compound[i]}']}"
+                    str+="#1_"+f"{ELEMENTS[compound[i+1]]}#1"
             
-    elif i == len(compound) - 1:
-        if compound[i].isalpha():
-            str+=f"{ELEMENTS[f'{compound[i]}']}#1"
-        else:
-            str+=compound[i]
+            elif compound[i].isalpha() and compound[i+1].isnumeric():
+                str+=f"{ELEMENTS[f'{compound[i]}']}#" + compound[i+1]
+                str+="_"
+            
+            jump=i+2
+                
+        elif i == len(compound) - 1:
+            if compound[i].isalpha():
+                str+=f"{ELEMENTS[f'{compound[i]}']}#1"
+            else:
+                str+=compound[i]
 
 
-if str[-1] == "_":
-    str = str[0:-1]
+    if str[-1] == "_":
+        str = str[0:-1]
 
-print(str)
+    return str
