@@ -92,6 +92,9 @@ def about():
     back_surface_2 = text_font_2_sm.render('BACK', False, 'brown2')
     credits_trans_surface = pygame.Surface((670,250), pygame.SRCALPHA)
     developedby_surface = text_font_3.render('Developed by: Suhail Hasan and Audad Ahmed', False, "white")
+    databasemanagement_surface = text_font_3.render('Database managed by: Audad Ahmed', False, "white")
+    gameidea_surface = text_font_3.render('Game Idea by: Suhail Hasan', False, "white")
+    
     
 
     if back_rect_1.collidepoint(pygame.mouse.get_pos()):
