@@ -111,7 +111,6 @@ def about():
     #Custom cursor
     cursor_rect.center = pygame.mouse.get_pos()
     screen.blit(cursor_image,cursor_rect)
-
     # print(pygame.mouse.get_pos())
 
 
