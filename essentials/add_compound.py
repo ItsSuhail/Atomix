@@ -1,4 +1,4 @@
-from sqlite3 import connect
+from sqlite3 import connect, IntegrityError
 from parser import parser
 
 # Add compounds to the db with their parsed formula
@@ -6,21 +6,30 @@ def add_compound():
   conn = connect('atomix.db')
   cursor = conn.cursor()
 
-  formulae = []
   while True:
     formula = input('Enter formula (q to quit): ')
     if formula.lower() == 'q': break
-    iupac = input('IUPAC Name: ')
+    # iupac = input('IUPAC Name: ')
 
-    formulae.append((parser(formula), iupac))
+    try:
+      parsed = parser(formula)
+      print(parsed)
 
-  if formulae == []:
-    raise ValueError('No formulae added.')
+      cursor.execute(f'''
+        INSERT INTO compounds (formula)
+        VALUES (?);
+      ''', [parsed])
 
-  cursor.executemany(f'''
-    INSERT INTO compounds (formula, iupac)
-    VALUES ({('?,'*len(formulae))[:-1]})
-  ''', formulae)
+    except IntegrityError:
+      print('Compound already added.')
+
+    except Exception as e:
+      conn.commit()
+      conn.close()
+      raise e
+
+    print()
+
 
   conn.commit()
   conn.close()
