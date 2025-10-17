@@ -1,8 +1,9 @@
 import pygame
+import random
 from sys import exit
 
 pygame.init()
-screen = pygame.display.set_mode((800, 400))
+screen = pygame.display.set_mode((900, 500))
 pygame.display.set_caption('Atomix')
 pygame.mouse.set_visible(False)
 
@@ -10,6 +11,7 @@ pygame.mouse.set_visible(False)
 MENU = "menu" #initial state
 PLAY = "play"
 ABOUT = "about"
+GAME = "game"
 
 # Current state
 state = MENU
@@ -88,6 +90,37 @@ def game_choose():
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
 
+x = 90
+y = -20
+
+def game():
+    global x,y
+    back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
+    game_surface = pygame.Surface((670,325), pygame.SRCALPHA)
+
+    x_rand = 90#random.randint(90, 690)
+    y_rand = -20#random.randint(50,70)
+    y+=2
+
+    if back_rect_1.collidepoint(pygame.mouse.get_pos()):
+        back_surface_1 = text_font_2_sm.render('BACK', False, 'cornflowerblue')
+
+
+    screen.blit(background_menu_surface, (0,0))
+    screen.blit(back_surface_1, (10,5))
+
+    pygame.draw.rect(game_surface, (255, 255, 255, 150), (0,0, 670, 325), border_radius=25)
+    pygame.draw.circle(game_surface, (0,255,255), (x, y), 25)
+    screen.blit(game_surface, (65,30))
+
+
+    #Custom cursor
+    cursor_rect.center = pygame.mouse.get_pos()
+    screen.blit(cursor_image,cursor_rect)
+    # pygame.mouse.set_visible(True)
+    # print(pygame.mouse.get_pos())
+
+
 def about():
     back_surface_2 = text_font_2_sm.render('BACK', False, 'brown2')
     credits_trans_surface = pygame.Surface((670,250), pygame.SRCALPHA)
@@ -107,6 +140,8 @@ def about():
 
     pygame.draw.rect(credits_trans_surface, (255, 180, 30, 150), (0,0, 670, 250), border_radius=25)
     credits_trans_surface.blit(developedby_surface, (10,10))
+    credits_trans_surface.blit(gameidea_surface, (10,40))
+    credits_trans_surface.blit(databasemanagement_surface, (10,70))
     screen.blit(credits_trans_surface, (65,100))
 
     
@@ -115,7 +150,6 @@ def about():
     cursor_rect.center = pygame.mouse.get_pos()
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
-
 
 
 fps = 60
@@ -162,6 +196,18 @@ while (True):
                 pygame.quit()
                 exit()
 
+
+    if state == GAME:
+        game()
+
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONUP:
+                if back_rect_1.collidepoint(pygame.mouse.get_pos()):
+                    state = MENU
+                
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
 
     pygame.display.update()
     clock.tick(fps) #Sets maximum frame rate (ceiling)
