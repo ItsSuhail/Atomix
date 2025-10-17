@@ -1,3 +1,2 @@
 pygame
-python-dotenv
-supabase
+sqlite3

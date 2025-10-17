@@ -1,17 +1,9 @@
-from supabase import create_client
-from dotenv import load_dotenv
+from sqlite3 import connect
 from parser import parser
-from check_env import check_env
-import os
 
-load_dotenv()
-
-@check_env
 def add_compound():
-  supabase = create_client(
-    os.environ.get('DB_URL'), #type: ignore
-    os.environ.get('DB_KEY')  #type: ignore
-  )
+  conn = connect('atomix.db')
+  cursor = conn.cursor()
 
   formulae = []
   while True:
@@ -19,19 +11,18 @@ def add_compound():
     if formula.lower() == 'q': break
     iupac = input('IUPAC Name: ')
 
-    formulae.append({
-      'formula': parser(formula),
-      'iupac': iupac
-    })
+    formulae.append((parser(formula), iupac))
 
   if formulae == []:
     raise ValueError('No formulae added.')
 
-  response = (
-    supabase.table('compounds')
-      .insert(formulae)
-      .execute()
-  )
+  cursor.executemany(f'''
+    INSERT INTO compounds (formula, iupac)
+    VALUES ({('?,'*len(formulae))[:-1]})
+  ''', formulae)
+
+  conn.commit()
+  conn.close()
 
 if __name__ == '__main__':
   add_compound()
