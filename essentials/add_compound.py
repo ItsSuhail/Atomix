@@ -1,6 +1,7 @@
 from sqlite3 import connect
 from parser import parser
 
+# Add compounds to the db with their parsed formula
 def add_compound():
   conn = connect('atomix.db')
   cursor = conn.cursor()
