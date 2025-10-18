@@ -56,7 +56,7 @@ def add_reaction():
         INSERT INTO reaction_compounds (reaction_id, compound_id, blankable, compound_type) VALUES (?, (SELECT id FROM compounds WHERE formula = ?), ?, ?)             
       ''', [reaction_id, parser(r), 0 if blankable == 'n' else 1, 'product'])
 
-  conn.commit()
+      conn.commit()
   conn.close()
 
 if __name__ == '__main__':

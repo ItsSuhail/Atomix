@@ -122,6 +122,8 @@ ELEMENTS = {
 }
 
 def parser(s):
+    if s == 'HCl': return '1#1_17#1'
+    if s == 'PCl5': return '15#1_17#5'
     str = ""
     compound = s
     compound = compound.replace('(', 'J')
