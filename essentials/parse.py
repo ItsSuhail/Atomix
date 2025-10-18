@@ -183,3 +183,14 @@ def parser(s):
         str = str[0:-1]
 
     return str
+
+
+def unparser(s):
+    formula = ''
+    for entity in s.split('_'):
+        symbol, count = entity.split('#')
+        formula += list(ELEMENTS.keys())[int(symbol) - 1]
+
+        if int(count) > 1: formula += count
+
+    return formula

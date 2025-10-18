@@ -1,5 +1,5 @@
 from sqlite3 import connect, IntegrityError
-from parser import parser
+from parse import parser
 
 def add_reaction():
   conn = connect('atomix.db')

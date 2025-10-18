@@ -1,5 +1,5 @@
 from sqlite3 import connect, IntegrityError
-from parser import parser
+from parse import parser
 
 # Add compounds to the db with their parsed formula
 def add_compound():
