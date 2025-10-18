@@ -7,6 +7,55 @@ screen = pygame.display.set_mode((900, 500))
 pygame.display.set_caption('Atomix')
 pygame.mouse.set_visible(False)
 
+class Babloo:
+    def __init__(self, x, y, radius, text, font, text_color=(0, 0, 0), babloo_color=(173, 216, 230)):
+        """
+        Initializes a Babloo instance.
+
+        Parameters:
+        - x, y: center coordinates of babloo on the game surface
+        - radius: radius of babloo
+        - text: text to display inside the babloo
+        - font: a pygame.font.Font object
+        - text_color: color of the text (default: black)
+        - bubloo_color: color of the babloo (default: light blue)
+        """
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.text = text
+        self.font = font
+        self.text_color = text_color
+        self.babloo_color = babloo_color
+
+        # Calculate surface size (a bit bigger than the babloo to avoid clipping)
+        self.surface_size = radius * 2 + 10
+        
+    def set_coords(self, x, y):
+        self.x = x
+        self.y = y
+
+    def draw(self, screen, append_x=0, append_y=0):
+        self.x += append_x # Speed along x
+        self.y += append_y # Speed along y
+
+        self.surface = pygame.Surface((self.surface_size, self.surface_size), pygame.SRCALPHA)
+
+        # The rect of the surface (positioned so that (x, y) is at the center of the babloo on the game surface)
+        self.rect = self.surface.get_rect(center=(self.x, self.y))
+        
+        center_in_surface = (self.surface_size // 2, self.surface_size // 2)
+        
+        # Drawing the babloo
+        pygame.draw.circle(self.surface, self.babloo_color, center_in_surface, self.radius)
+
+        # Rendering and bliting the text
+        text_surface = self.font.render(self.text, True, self.text_color)
+        text_rect = text_surface.get_rect(center=center_in_surface)
+        self.surface.blit(text_surface, text_rect)
+        screen.blit(self.surface, self.rect)
+
+
 # Game states
 MENU = "menu" #initial state
 PLAY = "play"
@@ -30,6 +79,8 @@ clock = pygame.time.Clock()
 background_menu_surface = pygame.image.load('assets/images/bgb.png')
 cursor_image = pygame.image.load('assets/images/flask.png')
 cursor_image = pygame.transform.scale(cursor_image, (32,32))
+big_flask = pygame.image.load('assets/images/bigflask.png')
+big_flask = pygame.transform.scale(big_flask, (110,140))
 rick_surface = pygame.image.load('assets/images/rick.png')
 rick_morty_surface = pygame.image.load('assets/images/rickmorty.png')
 title_surface = text_font_2.render('ATOMIX', False, 'white')
@@ -37,6 +88,7 @@ credit_surface = text_font_2.render('CREDITS', False, 'white')
 
 # Rectangles
 cursor_rect = cursor_image.get_rect()
+big_flask_rect = big_flask.get_rect()
 play_rect = pygame.Rect(600, 150, 130, 60) # Inside Main menu scene
 about_rect = pygame.Rect(580, 215, 160, 60) # Inside Main menu scene
 exit_rect = pygame.Rect(610, 280, 105, 60) # Inside Main menu scene
@@ -90,15 +142,11 @@ def game_choose():
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
 
-x = 120
-y = -20
-
+# b = Babloo(x, y, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
 def game():
-    global x,y
+    # global b
     back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
     game_surface = pygame.Surface((770,400), pygame.SRCALPHA)
-
-    y+=3.5
 
     if back_rect_1.collidepoint(pygame.mouse.get_pos()):
         back_surface_1 = text_font_2_sm.render('BACK', False, 'cornflowerblue')
@@ -107,14 +155,15 @@ def game():
     screen.blit(background_menu_surface, (0,0))
     screen.blit(back_surface_1, (10,5))
 
-    pygame.draw.rect(game_surface, (255, 255, 255, 150), (0,0, 770, 400), border_radius=15)
-    pygame.draw.circle(game_surface, (0,255,255), (x, y), 25)
+    pygame.draw.rect(game_surface, (255, 255, 255, 200), (0,0, 770, 400), border_radius=15)
+    # b.draw(game_surface,0, 3.5)
+    # pygame.draw.circle(game_surface, (0,255,255), (x, y), 25)
     screen.blit(game_surface, (65,50))
 
 
     #Custom cursor
-    cursor_rect.center = pygame.mouse.get_pos()
-    screen.blit(cursor_image,cursor_rect)
+    big_flask_rect.center = pygame.mouse.get_pos()
+    screen.blit(big_flask,big_flask_rect)
     # pygame.mouse.set_visible(True)
     # print(pygame.mouse.get_pos())
 
@@ -150,7 +199,7 @@ def about():
     # print(pygame.mouse.get_pos())
 
 
-state = MENU
+state = GAME
 
 fps = 60
 while (True):
