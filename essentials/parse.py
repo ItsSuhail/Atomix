@@ -128,6 +128,9 @@ def parser(s):
     if s == '(CH3)3CBr': return '119#1_6#1_1#3_120#3_6#1_35#1'
     if s == 'CCl4': return '6#1_17#4'
     if s == 'CH3CH2OMgCl': return '6#1_1#3_6#1_1#2_8#1_12#1_17#1'
+    if s == 'CH3ONa': return '6#1_1#3_8#1_11#1'
+    if s == 'C6H6ONa': return '6#6_1#6_8#1_11#1'
+    if s == 'HBr': return '1#1_35#1'
     str = ""
     compound = s
     compound = compound.replace('(', 'J')
