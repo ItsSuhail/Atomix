@@ -124,6 +124,10 @@ ELEMENTS = {
 def parser(s):
     if s == 'HCl': return '1#1_17#1'
     if s == 'PCl5': return '15#1_17#5'
+    if s == 'PCl3': return '15#1_17#3'
+    if s == '(CH3)3CBr': return '119#1_6#1_1#3_120#3_6#1_35#1'
+    if s == 'CCl4': return '6#1_17#4'
+    if s == 'CH3CH2OMgCl': return '6#1_1#3_6#1_1#2_8#1_12#1_17#1'
     str = ""
     compound = s
     compound = compound.replace('(', 'J')
@@ -189,7 +193,10 @@ def unparser(s):
     formula = ''
     for entity in s.split('_'):
         symbol, count = entity.split('#')
-        formula += list(ELEMENTS.keys())[int(symbol) - 1]
+        if symbol == '119': formula += '('
+        elif symbol == '120': formula += ')'
+        else:
+            formula += list(ELEMENTS.keys())[int(symbol) - 1]
 
         if int(count) > 1: formula += count
 
