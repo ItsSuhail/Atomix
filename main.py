@@ -18,7 +18,7 @@ class Babloo:
         - text: text to display inside the babloo
         - font: a pygame.font.Font object
         - text_color: color of the text (default: black)
-        - bubloo_color: color of the babloo (default: light blue)
+        - babloo_color: color of the babloo (default: light blue)
         """
         self.x = x
         self.y = y
@@ -34,6 +34,9 @@ class Babloo:
     def set_coords(self, x, y):
         self.x = x
         self.y = y
+
+    def get_coords(self):
+        return (self.x,self.y)
 
     def draw(self, screen, append_x=0, append_y=0):
         self.x += append_x # Speed along x
@@ -55,6 +58,30 @@ class Babloo:
         self.surface.blit(text_surface, text_rect)
         screen.blit(self.surface, self.rect)
 
+class BablooManagement:
+    possible_x = [55, 130, 205, 280, 355, 405, 505, 580, 655]
+
+    def __init__(self, *babloos, radius=25, font, text_color=(0, 0, 0), babloo_color=(173, 216, 230)):
+        self.babloos = list(babloos)
+        self.radius = radius
+        self.font = font
+        self.text_color = text_color
+        self.babloo_color = babloo_color
+
+    def add_babloo(self, babloo):
+        self.babloos.append(babloo)
+    
+    def spawn_babloo(self,atoms):
+        babloo_spawn = Babloo((random.choice(self.possible_x)+random.randint(-25,25)),random.randrange(-30, 5),self.radius,random.choice(atoms),self.font, self.text_color, self.babloo_color)
+        self.babloos.append(babloo_spawn)
+
+    def draw(self, screen,append_x, append_y):
+        for babloo,index in zip(self.babloos,range(0,len(self.babloos))):
+            if babloo.get_coords()[1] > 400:
+                # print('deleting')
+                del self.babloos[index]
+            babloo.draw(screen, append_x, append_y)
+            
 
 # Game states
 MENU = "menu" #initial state
@@ -64,7 +91,7 @@ GAME = "game"
 
 # Current state
 state = MENU
-
+spawn = False
 
 # Initializing fonts
 text_font_1 = pygame.font.Font('assets/fonts/font1.ttf',60)
@@ -80,7 +107,7 @@ background_menu_surface = pygame.image.load('assets/images/bgb.png')
 cursor_image = pygame.image.load('assets/images/flask.png')
 cursor_image = pygame.transform.scale(cursor_image, (32,32))
 big_flask = pygame.image.load('assets/images/bigflask.png')
-big_flask = pygame.transform.scale(big_flask, (110,140))
+big_flask = pygame.transform.scale(big_flask, (95,120))
 rick_surface = pygame.image.load('assets/images/rick.png')
 rick_morty_surface = pygame.image.load('assets/images/rickmorty.png')
 title_surface = text_font_2.render('ATOMIX', False, 'white')
@@ -142,9 +169,12 @@ def game_choose():
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
 
-# b = Babloo(x, y, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
+# b1 = Babloo(random.randint(25,700), -20, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
+# b2 = Babloo(random.randint(25,700), 5, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
+# b3 = Babloo(random.randint(25,700), 15, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
+b = BablooManagement(radius=25, font=text_font_3, text_color=(255,255,255), babloo_color=(25, 200, 25))
 def game():
-    # global b
+    global b,spawn
     back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
     game_surface = pygame.Surface((770,400), pygame.SRCALPHA)
 
@@ -156,7 +186,10 @@ def game():
     screen.blit(back_surface_1, (10,5))
 
     pygame.draw.rect(game_surface, (255, 255, 255, 200), (0,0, 770, 400), border_radius=15)
-    # b.draw(game_surface,0, 3.5)
+    if spawn:
+        b.spawn_babloo(['H','O','N','C'])
+        spawn=False
+    b.draw(game_surface,random.random()*(random.choice([-2,2])), 3)
     # pygame.draw.circle(game_surface, (0,255,255), (x, y), 25)
     screen.blit(game_surface, (65,50))
 
@@ -202,6 +235,7 @@ def about():
 state = GAME
 
 fps = 60
+pygame.time.set_timer(pygame.USEREVENT, 500)
 while (True):
 
     if state == MENU:
@@ -257,6 +291,9 @@ while (True):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+
+            if event.type == pygame.USEREVENT:
+                spawn = True
 
     pygame.display.update()
     clock.tick(fps) #Sets maximum frame rate (ceiling)
