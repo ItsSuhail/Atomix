@@ -64,7 +64,7 @@ def menu():
     screen.blit(play_surface, (600,150))
     screen.blit(about_surface, (580,215))
     screen.blit(exit_surface, (610,280))
-    screen.blit(title_surface, (325,20))
+    screen.blit(title_surface, (360,20))
     
     # Custom cursor
     cursor_rect.center = pygame.mouse.get_pos()
@@ -80,8 +80,8 @@ def game_choose():
 
 
     screen.blit(background_menu_surface, (0,0))
-    screen.blit(rick_morty_surface, (-40,0))
-    screen.blit(title_surface, (325,20))
+    screen.blit(rick_morty_surface, (-40,70))
+    screen.blit(title_surface, (360,20))
     screen.blit(back_surface_1, (10,5))
 
 
@@ -90,17 +90,15 @@ def game_choose():
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
 
-x = 90
+x = 120
 y = -20
 
 def game():
     global x,y
     back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
-    game_surface = pygame.Surface((670,325), pygame.SRCALPHA)
+    game_surface = pygame.Surface((770,400), pygame.SRCALPHA)
 
-    x_rand = 90#random.randint(90, 690)
-    y_rand = -20#random.randint(50,70)
-    y+=2
+    y+=3.5
 
     if back_rect_1.collidepoint(pygame.mouse.get_pos()):
         back_surface_1 = text_font_2_sm.render('BACK', False, 'cornflowerblue')
@@ -109,9 +107,9 @@ def game():
     screen.blit(background_menu_surface, (0,0))
     screen.blit(back_surface_1, (10,5))
 
-    pygame.draw.rect(game_surface, (255, 255, 255, 150), (0,0, 670, 325), border_radius=25)
+    pygame.draw.rect(game_surface, (255, 255, 255, 150), (0,0, 770, 400), border_radius=15)
     pygame.draw.circle(game_surface, (0,255,255), (x, y), 25)
-    screen.blit(game_surface, (65,30))
+    screen.blit(game_surface, (65,50))
 
 
     #Custom cursor
@@ -135,7 +133,7 @@ def about():
 
 
     screen.blit(background_menu_surface, (0,0))
-    screen.blit(credit_surface, (325,20))
+    screen.blit(credit_surface, (360,20))
     screen.blit(back_surface_2, (10,5))
 
     pygame.draw.rect(credits_trans_surface, (255, 180, 30, 150), (0,0, 670, 250), border_radius=25)
@@ -151,6 +149,8 @@ def about():
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
 
+
+state = MENU
 
 fps = 60
 while (True):
