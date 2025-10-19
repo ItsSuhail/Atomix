@@ -193,14 +193,26 @@ def parser(s):
 
 
 def unparser(s):
+    '''
+    Returns:
+        dict: formula, ele_symbols, ele_ids
+    '''
     formula = ''
+    ele_symbols, ele_ids = [], []
+
     for entity in s.split('_'):
-        symbol, count = entity.split('#')
-        if symbol == '119': formula += '('
-        elif symbol == '120': formula += ')'
+        symbol_id, count = entity.split('#')
+
+        if symbol_id == '119': symbol = '('
+        elif symbol_id == '120': symbol = ')'
         else:
-            formula += list(ELEMENTS.keys())[int(symbol) - 1]
+            symbol = list(ELEMENTS.keys())[int(symbol_id) - 1]
+
+        ele_ids.append(symbol_id)
+        ele_symbols.append(symbol)
+
+        formula += symbol
 
         if int(count) > 1: formula += count
 
-    return formula
+    return (formula, ele_symbols, ele_ids)

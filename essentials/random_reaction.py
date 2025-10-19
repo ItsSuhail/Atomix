@@ -1,4 +1,5 @@
 from sqlite3 import connect
+from parse import unparser
 
 def random_reaction():
   """
@@ -19,7 +20,8 @@ def random_reaction():
   ''', [reaction_id])
   compounds = cursor.fetchall();
   
-  reactants, products, unblankables = [], [], []
+  reactants, products, unblankables, ele_symbols, ele_ids = [], [], [], set(), set()
+
   for ind, compound in enumerate(compounds):
     formula = compound[5]
     if compound[3] == 'product':
@@ -29,10 +31,24 @@ def random_reaction():
       reactants.append(formula)
 
     if compound[2] == 0: unblankables.append(formula)
-  
+
+    unparsed = unparser(formula)
+    ele_symbols = ele_symbols.union(set(unparsed[1]))
+    ele_ids = ele_ids.union(set(unparsed[2]))
+ 
 
   conn.close()
-  return { "products": products, "reactants": reactants, "unblankables": unblankables }
+  to_ret =  {
+    'products': products,
+    'reactants': reactants,
+    'unblankables': unblankables,
+    'ele_symbols': ele_symbols,
+    'ele_ids': ele_ids
+  }
+
+  if __name__ == '__main__': print(to_ret)
+
+  return to_ret
 
 
 if __name__ == '__main__':
