@@ -76,11 +76,20 @@ class BablooManagement:
         self.babloos.append(babloo_spawn)
 
     def draw(self, screen,append_x, append_y):
+        pygame.mouse.set_visible(True)
         for babloo,index in zip(self.babloos,range(0,len(self.babloos))):
+            babloo_x,babloo_y = babloo.get_coords()
+            # pygame.mouse.set_pos(babloo_x,babloo_y)
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            x,y = (abs(abs(babloo_x-mouse_x)-60), abs(abs(babloo_y-mouse_y)-60))
+            
             if babloo.get_coords()[1] > 400:
-                # print('deleting')
                 del self.babloos[index]
-            babloo.draw(screen, append_x, append_y)
+            elif (x**2 + y**2)**.5 <= 25:
+                del self.babloos[index]
+            else:
+                babloo.draw(screen, append_x, append_y)
+
             
 
 # Game states
@@ -235,7 +244,7 @@ def about():
 state = GAME
 
 fps = 60
-pygame.time.set_timer(pygame.USEREVENT, 500)
+pygame.time.set_timer(pygame.USEREVENT, 1000)
 while (True):
 
     if state == MENU:
@@ -292,7 +301,10 @@ while (True):
                 pygame.quit()
                 exit()
 
-            if event.type == pygame.USEREVENT:
+            if event.type == pygame.KEYDOWN:
+                state = 'NONE'
+
+            if event.type == pygame.USEREVENT: # When the timer ticks, spawns a babloo
                 spawn = True
 
     pygame.display.update()
