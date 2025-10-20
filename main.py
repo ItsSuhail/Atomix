@@ -153,6 +153,10 @@ rick_morty_surface = pygame.image.load('assets/images/rickmorty.png')
 title_surface = text_font_2.render('ATOMIX', False, 'white')
 credit_surface = text_font_2.render('CREDITS', False, 'white')
 
+image1 = pygame.transform.scale(pygame.image.load('assets/images/img1.png'),(325,325))
+image2 = pygame.transform.scale(pygame.image.load('assets/images/img2.png'),(300,300))
+image3 = pygame.transform.scale(pygame.image.load('assets/images/img3.png'),(600,450))
+
 ## Rectangles
 
 cursor_rect = cursor_image.get_rect()
@@ -407,7 +411,11 @@ def about():
     credits_trans_surface.blit(developedby_surface, (10,10))
     credits_trans_surface.blit(gameidea_surface, (10,40))
     credits_trans_surface.blit(databasemanagement_surface, (10,70))
-    screen.blit(credits_trans_surface, credits_trans_surface.get_rect(center=(screen.get_width()/2, screen.get_height()/2)))
+    screen.blit(credits_trans_surface, credits_trans_surface.get_rect(center=(screen.get_width()/2, 3*screen.get_height()/9)))
+
+    screen.blit(image1, image1.get_rect(center = (150, 4.8*screen.get_height()/7)))
+    screen.blit(image3, image3.get_rect(center = (550, 4.9*screen.get_height()/7)))
+    screen.blit(image2, image2.get_rect(center = (750, 5*screen.get_height()/7)))
 
     #Custom cursor
     cursor_rect.center = pygame.mouse.get_pos()
@@ -449,7 +457,7 @@ outside = False
 chosen = ""
 
 fps = 60
-pygame.time.set_timer(pygame.USEREVENT, 700)
+pygame.time.set_timer(pygame.USEREVENT, 300)
 
 while (True):
 
