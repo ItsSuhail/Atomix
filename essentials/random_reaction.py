@@ -25,7 +25,7 @@ def random_reaction(grade):
 
   # Join to get formula to return
   cursor.execute('''
-    SELECT * FROM reaction_compounds JOIN compounds on compounds.id = compound_id WHERE reaction_id = ?
+    SELECT * FROM reaction_compounds JOIN compounds ON compounds.id = compound_id WHERE reaction_id = ?
   ''', [reaction_id])
   compounds = cursor.fetchall();
   
