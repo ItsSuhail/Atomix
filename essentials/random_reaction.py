@@ -1,9 +1,12 @@
 from sqlite3 import connect
 from essentials.parse import unparser
 
-def random_reaction():
+def random_reaction(grade):
   """
     Fetches a random reaction
+
+    Args:
+      grade: Reactions from which grade (11/12)
 
     Returns:
       dict: products, reactants and unblankables
@@ -11,7 +14,7 @@ def random_reaction():
   conn = connect('atomix.db')
   cursor = conn.cursor()
 
-  cursor.execute('SELECT id FROM reactions ORDER BY random() LIMIT 1')
+  cursor.execute(f'SELECT id FROM reactions WHERE grade = {grade} ORDER BY random() LIMIT 1')
   reaction_id = cursor.fetchone()[0]
 
   # Join to get formula to return
@@ -52,4 +55,4 @@ def random_reaction():
 
 
 if __name__ == '__main__':
-  random_reaction()
+  random_reaction('12')
