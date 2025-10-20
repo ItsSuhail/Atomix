@@ -4,7 +4,10 @@ from essentials.random_reaction import *
 from essentials.parse import *
 from sys import exit
 
+
 pygame.init()
+pygame.mixer.init()
+
 screen = pygame.display.set_mode((900, 500))
 pygame.display.set_caption('Atomix')
 pygame.mouse.set_visible(False)
@@ -51,6 +54,9 @@ class Babloo:
         babloo_x,babloo_y = self.get_screen_coords()
         return ((mouse_x-babloo_x)**2 + (mouse_y-babloo_y)**2)**.5
 
+    def get_text(self):
+        return self.text
+
     def draw(self, screen, append_x=0, append_y=0):
         self.surface = pygame.Surface((self.surface_size, self.surface_size), pygame.SRCALPHA)
 
@@ -88,16 +94,25 @@ class BablooManagement:
         babloo_spawn = Babloo((random.choice(self.possible_x)+random.randint(-25,25)),random.randrange(-30, 5),self.radius,random.choices(population=atoms, weights=weights,k=1)[0],self.font, self.text_color, self.babloo_color)
         self.babloos.append(babloo_spawn)
 
+    def clear_all(self):
+        self.babloos.clear()
+
     def draw(self, screen,append_x, append_y):
         for babloo,index in zip(self.babloos,range(0,len(self.babloos))):
             if babloo.get_coords()[1] > 400:
                 del self.babloos[index]
             elif babloo.distance_from_mouse() <= 25:
                 del self.babloos[index]
+                return babloo.get_text()
             else:
                 babloo.draw(screen, append_x, append_y)
 
             
+
+# Loading sound effects
+reaction_complete_sound = pygame.mixer.Sound("assets/sounds/reaction_complete.wav")
+successful_collection_sound = pygame.mixer.Sound("assets/sounds/successful_collection.wav")
+wrong_answer_sound = pygame.mixer.Sound("assets/sounds/wrong_answer.wav")
 
 # Game states
 MENU = "menu" #initial state
@@ -107,13 +122,14 @@ GAME = "game"
 
 # Current state
 state = MENU
-spawn = False
 
 # Initializing fonts
 text_font_1 = pygame.font.Font('assets/fonts/font1.ttf',60)
 text_font_2 = pygame.font.Font('assets/fonts/font2.ttf',60)
+text_font_2_reg = pygame.font.Font('assets/fonts/font2.ttf',40)
 text_font_2_sm = pygame.font.Font('assets/fonts/font2.ttf',25)
 text_font_3 = pygame.font.Font('assets/fonts/RobotoSlab-SemiBold.ttf', 28)
+text_font_3_sm = pygame.font.Font('assets/fonts/RobotoSlab-SemiBold.ttf', 23)
 
 # Clock
 clock = pygame.time.Clock()
@@ -135,7 +151,17 @@ big_flask_rect = big_flask.get_rect()
 play_rect = pygame.Rect(600, 150, 130, 60) # Inside Main menu scene
 about_rect = pygame.Rect(580, 215, 160, 60) # Inside Main menu scene
 exit_rect = pygame.Rect(610, 280, 105, 60) # Inside Main menu scene
+
+
+grade11_rect = pygame.Rect(600, 150, 130, 60) # Inside Game choose scene
+grade12_rect = pygame.Rect(580, 215, 160, 60) # Inside Game choose scene
+combined_rect = pygame.Rect(610, 280, 105, 60) # Inside Game choose scene
+
 back_rect_1 = pygame.Rect(10,5, 56,28) # Inside Game choose scene
+
+
+# Babloo management
+b = BablooManagement(radius=25, font=text_font_3, text_color=(255,255,255), babloo_color=(25, 200, 25))
 
 def menu():
     play_surface = text_font_2.render('PLAY', False, 'brown2')
@@ -167,31 +193,57 @@ def menu():
     # print(pygame.mouse.get_pos())
 
 def game_choose():
+    global chosen
+
+    grade11_surface = text_font_2_reg.render('Grade 11', False, 'brown2')
+    grade12_surface = text_font_2_reg.render('Grade 12', False, 'brown2')
+    combined_surface = text_font_2_reg.render('Combined', False, 'brown2')
+    choose_surface = text_font_3_sm.render('Choose a Grade, and complete the reactions thrown at you!', False, 'brown2')
     back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
 
+    if grade11_rect.collidepoint(pygame.mouse.get_pos()):
+        grade11_surface = text_font_2_reg.render('Grade 11', False, 'cornflowerblue')
+
+    if grade12_rect.collidepoint(pygame.mouse.get_pos()):
+        grade12_surface = text_font_2_reg.render('Grade 12', False, 'cornflowerblue')
+        
+    if combined_rect.collidepoint(pygame.mouse.get_pos()):
+        combined_surface = text_font_2_reg.render('Combined', False, 'cornflowerblue')
 
     if back_rect_1.collidepoint(pygame.mouse.get_pos()):
         back_surface_1 = text_font_2_sm.render('BACK', False, 'cornflowerblue')
 
+    
+    # Menu rectangle
 
     screen.blit(background_menu_surface, (0,0))
     screen.blit(rick_morty_surface, (-40,70))
     screen.blit(title_surface, (360,20))
     screen.blit(back_surface_1, (10,5))
 
+    pygame.draw.rect(screen, 'azure2', (575,150,175, 205), border_radius=25)
+    pygame.draw.rect(screen, 'azure2', (5,450,890,45), border_radius=10)
+
+    screen.blit(grade11_surface, (585,160))
+    screen.blit(grade12_surface, (580,225))
+    screen.blit(combined_surface, (580,290))
+    screen.blit(choose_surface, choose_surface.get_rect(center = (450, 472.5)))
 
     #Custom cursor
     cursor_rect.center = pygame.mouse.get_pos()
     screen.blit(cursor_image,cursor_rect)
-    # print(pygame.mouse.get_pos())
 
-b = BablooManagement(radius=25, font=text_font_3, text_color=(255,255,255), babloo_color=(25, 200, 25))
 def game():
-    global b, spawn, score, reaction_shown, reaction, collected_string, blanked, atoms, weights
+    global b, spawn, score, reaction_shown, reaction, collected_string, blanked, atoms, weights, blanked_string, reactants_str, products_str, is_product, fade, outside, chosen
 
+    if fade !=0:
+        fade -= 3
+        if fade < 0:
+            fade = 0
+    
     if not reaction_shown:
         reaction_shown = True
-        reaction_dict = random_reaction(12)
+        reaction_dict = random_reaction(chosen)
         reactants = reaction_dict['reactants']
         products = reaction_dict['products']
         unblankables = reaction_dict['unblankables']
@@ -201,6 +253,8 @@ def game():
         weights.extend([1]*6)
         
         if random.choice([-1,1]) == 1:
+            is_product = True
+            
             choice = random.choice(products)
             while (choice in unblankables):
                 choice = random.choice(products)
@@ -210,12 +264,8 @@ def game():
 
             reactants_str = " + ".join(list(map(unparser_no_bs, reactants)))
             products_str = " + ".join(list(map(unparser_no_bs, products_)))
-            if products_str != '':
-                products_str = products_str + " + " + "_"*len(blanked)
-            else:
-                products_str = "_"*len(blanked)
-            reaction = reactants_str + " --> " + products_str
-
+            
+            blanked_string = "_"*len(blanked)
         else:
             choice = random.choice(reactants)
             while (choice in unblankables):
@@ -224,20 +274,45 @@ def game():
             reactants_ = reactants.copy()
             reactants_.remove(choice)
 
-            reactants_str = " + ".join(list(map(unparser_no_bs, reactants_)))
-            if reactants_str != "":
-                reactants_str = reactants_str + " + " + "_"*len(blanked)
-            else:
-                reactants_str = "_"*len(blanked)
-
             products_str = " + ".join(list(map(unparser_no_bs, products)))
-            reaction = reactants_str + " --> " + products_str
+            reactants_str = " + ".join(list(map(unparser_no_bs, reactants_)))
+            
+            blanked_string = "_"*len(blanked)
 
-    
-    back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
-    reaction_surface = text_font_3.render(reaction, False, 'brown2')
-    score_surface = text_font_3.render(f'Score: {score}',False, 'white')
+        print(blanked)
+            
+    if is_product:
+        if products_str != '':
+            products_final_str = products_str + " + " + blanked_string
+        else:
+            products_final_str = blanked_string
+        reaction = reactants_str + " --> " + products_final_str
+    else:
+        if reactants_str != "":
+            reactants_final_str = reactants_str + " + " + blanked_string
+        else:
+            reactants_final_str = blanked_string
+        reaction = reactants_final_str + " --> " + products_str
+
     game_surface = pygame.Surface((770,400), pygame.SRCALPHA)
+
+    back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
+    reaction_surface = text_font_3.render(reaction, False, 'yellow')
+    score_surface = text_font_3.render(f'Score: {score}',False, 'white')
+    blanked_surface = text_font_3.render(blanked, False, (255, 125, 0, fade))
+    faded_surface = pygame.Surface((blanked_surface.get_width(), blanked_surface.get_height()), pygame.SRCALPHA)
+    faded_surface.fill((255, 255, 255, 0))
+    faded_surface.set_alpha(fade)
+
+    if len(reaction) > 35:
+        reaction_surface = text_font_3_sm.render(reaction, False, 'yellow')
+
+    reaction_rect = reaction_surface.get_rect(center = (screen.get_width()/2, 20))
+    score_rect = score_surface.get_rect(center = (screen.get_width()/2, 475))
+    blanked_rect = blanked_surface.get_rect(center = (faded_surface.get_width()/2, faded_surface.get_height()/2))
+    faded_surface_rect = faded_surface.get_rect(center = (game_surface.get_width()/2, game_surface.get_height()/2))
+    
+    faded_surface.blit(blanked_surface, blanked_rect)
 
     if back_rect_1.collidepoint(pygame.mouse.get_pos()):
         back_surface_1 = text_font_2_sm.render('BACK', False, 'cornflowerblue')
@@ -245,27 +320,59 @@ def game():
 
     screen.blit(background_menu_surface, (0,0))
     screen.blit(back_surface_1, (10,5))
-    screen.blit(reaction_surface, (150, 5))
+    screen.blit(reaction_surface, reaction_rect)
     pygame.draw.rect(game_surface, (255, 255, 255, 200), (0,0, 770, 400), border_radius=15)
 
-    if spawn:
+    if spawn and fade == 0 and not outside:
         b.spawn_babloo(atoms,weights)
         spawn=False
     
-    
-    b.draw(game_surface,random.random()*(random.choice([-2,2])), 4+random.random())
+    collected = None
+    if fade == 0:
+        collected = b.draw(game_surface,random.random()*(random.choice([-2,2])), 4+random.random())
 
+    if collected and not outside:
+        # print('yes')
+        collected_string = collected_string + collected
+        if blanked == collected_string:
+            reaction_complete_sound.play()
+            blanked_string = collected_string
+            collected_string = ""
+            score += 1
+            reaction_shown = False
+
+        elif blanked.startswith(collected_string):
+            successful_collection_sound.play()
+            diff = len(blanked) - len(collected_string)
+            blanked_string = collected_string + "_"*diff
+
+        else:
+            wrong_answer_sound.play()
+            fade = 255
+            collected_string = ""
+            blanked_string = "_"*len(blanked)
+        
+
+
+    game_surface.blit(faded_surface, faded_surface_rect)
     screen.blit(game_surface, (65,50))
 
     #Custom cursor
-    mouse_x,mouse_y = pygame.mouse.get_pos()[0], 300
+    mouse_x, mouse_actual_y = pygame.mouse.get_pos()
+    mouse_y = 300
     
-    big_flask_rect.center = (mouse_x,mouse_y+50)
-    screen.blit(big_flask,big_flask_rect)
-    screen.blit(score_surface, (200, 450))
-    # pygame.mouse.set_visible(True)
-    # print(pygame.mouse.get_pos())
+    if mouse_x > 65 and mouse_x < 835 and mouse_actual_y > 38 and mouse_actual_y < 460:
+        outside = False
+        big_flask_rect.center = (mouse_x,mouse_y+50)
+        screen.blit(big_flask,big_flask_rect)
+    else:
+        outside = True
+        cursor_rect.center = pygame.mouse.get_pos()
+        screen.blit(cursor_image, cursor_rect)
+    screen.blit(score_surface, score_rect)
 
+    # print(pygame.mouse.get_pos())
+    # pygame.mouse.set_visible(True)
 
 def about():
     back_surface_2 = text_font_2_sm.render('BACK', False, 'brown2')
@@ -296,19 +403,42 @@ def about():
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
 
-
-
+def reset():
+    global spawn, b, score, reaction_shown, reaction, collected_string, atoms, weights, blanked, blanked_string, reactants_str, products_str, is_product, fade, outside, chosen
+    score = 0
+    reaction_shown = False
+    reaction = ""
+    collected_string = ""
+    atoms = []
+    weights = []
+    blanked = "" # Blanked component of the reaction
+    blanked_string = "" # Blanked text shown consisting of underscores and collected atoms
+    reactants_str = ""
+    products_str = ""
+    is_product = False
+    fade = 0
+    outside = False
+    chosen = ""
+    spawn = False
+    b.clear_all()
+    
+spawn = False
 score = 0
 reaction_shown = False
 reaction = ""
 collected_string = ""
 atoms = []
 weights = []
-blanked = ""
+blanked = "" # Blanked component of the reaction
+blanked_string = "" # Blanked text shown consisting of underscores and collected atoms
+reactants_str = ""
+products_str = ""
+is_product = False
+fade = 0
+outside = False
+chosen = ""
 
-state = GAME
-
-fps = 120
+fps = 60
 pygame.time.set_timer(pygame.USEREVENT, 700)
 
 while (True):
@@ -339,6 +469,18 @@ while (True):
                 if back_rect_1.collidepoint(pygame.mouse.get_pos()):
                     state = MENU
                 
+                elif grade11_rect.collidepoint(pygame.mouse.get_pos()):
+                    chosen = "11"
+                    state = GAME
+
+                elif grade12_rect.collidepoint(pygame.mouse.get_pos()):
+                    chosen = "12"
+                    state = GAME
+                
+                elif combined_rect.collidepoint(pygame.mouse.get_pos()):
+                    chosen = "C"
+                    state = GAME
+                
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
@@ -361,14 +503,12 @@ while (True):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 if back_rect_1.collidepoint(pygame.mouse.get_pos()):
-                    state = MENU                
+                    state = MENU
+                    reset()            
 
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-
-            if event.type == pygame.KEYDOWN:
-                state = 'NONE'
 
             if event.type == pygame.USEREVENT: # When the timer ticks, spawns a babloo
                 spawn = True

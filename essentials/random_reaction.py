@@ -1,16 +1,20 @@
 from sqlite3 import connect
 from essentials.parse import unparser
+import random
 
 def random_reaction(grade):
   """
     Fetches a random reaction
 
     Args:
-      grade: Reactions from which grade (11/12)
+      grade: Reactions from which grade (11/12/C)
 
     Returns:
       dict: products, reactants and unblankables
   """
+  if grade == "C":
+    grade = random.choice([11,12])
+
   conn = connect('atomix.db')
   cursor = conn.cursor()
 
