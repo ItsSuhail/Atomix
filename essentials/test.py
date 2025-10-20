@@ -1,3 +1,3 @@
-from parse import unparser
+from parse import unparser, parser
 
-print(unparser('19#1_17#1'))
+print(parser('HgO -> Hg + O2'))

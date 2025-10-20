@@ -10,7 +10,7 @@ def add_reaction():
     if input('Another one? (y/n): ').lower() == 'n': break
 
     # Create new reaction and get its ID
-    cursor.execute('INSERT INTO reactions (grade) VALUES (\'12\')')
+    cursor.execute('INSERT INTO reactions (grade) VALUES (\'11\')')
     cursor.execute('SELECT id FROM reactions ORDER BY id DESC LIMIT 1')
     reaction_id = cursor.fetchone()[0]
 

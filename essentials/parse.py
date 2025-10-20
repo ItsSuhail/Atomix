@@ -122,6 +122,7 @@ ELEMENTS = {
 }
 
 def parser(s):
+    if s == 'KClO3': return '19#1_17#1_8#3'
     if s == 'KCl': return '19#1_17#1'
     if s == 'HCl': return '1#1_17#1'
     if s == 'PCl5': return '15#1_17#5'
