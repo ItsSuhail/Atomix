@@ -222,3 +222,6 @@ def unparser(s):
         if int(count) > 1: formula += count
 
     return (formula, ele_symbols, ele_ids)
+
+def unparser_no_bs(s):
+    return unparser(s)[0]

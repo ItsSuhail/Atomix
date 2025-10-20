@@ -84,8 +84,8 @@ class BablooManagement:
     def add_babloo(self, babloo):
         self.babloos.append(babloo)
     
-    def spawn_babloo(self,atoms):
-        babloo_spawn = Babloo((random.choice(self.possible_x)+random.randint(-25,25)),random.randrange(-30, 5),self.radius,random.choice(atoms),self.font, self.text_color, self.babloo_color)
+    def spawn_babloo(self,atoms,weights):
+        babloo_spawn = Babloo((random.choice(self.possible_x)+random.randint(-25,25)),random.randrange(-30, 5),self.radius,random.choices(population=atoms, weights=weights,k=1)[0],self.font, self.text_color, self.babloo_color)
         self.babloos.append(babloo_spawn)
 
     def draw(self, screen,append_x, append_y):
@@ -187,7 +187,7 @@ def game_choose():
 
 b = BablooManagement(radius=25, font=text_font_3, text_color=(255,255,255), babloo_color=(25, 200, 25))
 def game():
-    global b, spawn, score, reaction_shown, reaction, collected_string, blanked
+    global b, spawn, score, reaction_shown, reaction, collected_string, blanked, atoms, weights
 
     if not reaction_shown:
         reaction_shown = True
@@ -195,44 +195,47 @@ def game():
         reactants = reaction_dict['reactants']
         products = reaction_dict['products']
         unblankables = reaction_dict['unblankables']
-        ele_symbols = reaction_dict['ele_symbols']
+        atoms = list(reaction_dict['ele_symbols'])
+        weights = [4]*len(atoms)
+        atoms.extend(['2','3','4','5','6','7'])
+        weights.extend([1]*6)
         
         if random.choice([-1,1]) == 1:
             choice = random.choice(products)
             while (choice in unblankables):
                 choice = random.choice(products)
-            blanked = unparser(choice)
+            blanked = unparser_no_bs(choice)
             products_ = products.copy()
             products_.remove(choice)
 
-            reactants_str = " + ".join(list(map(unparser, reactants)))
-            products_str = " + ".join(list(map(unparser, products_)))
+            reactants_str = " + ".join(list(map(unparser_no_bs, reactants)))
+            products_str = " + ".join(list(map(unparser_no_bs, products_)))
             if products_str != '':
-                products_str = products_str + " + __?__"
+                products_str = products_str + " + " + "_"*len(blanked)
             else:
-                products_str = "__?__"
+                products_str = "_"*len(blanked)
             reaction = reactants_str + " --> " + products_str
 
         else:
             choice = random.choice(reactants)
             while (choice in unblankables):
                 choice = random.choice(reactants)
-            blanked = unparser(choice)
+            blanked = unparser_no_bs(choice)
             reactants_ = reactants.copy()
             reactants_.remove(choice)
 
-            reactants_str = " + ".join(list(map(unparser, reactants_)))
+            reactants_str = " + ".join(list(map(unparser_no_bs, reactants_)))
             if reactants_str != "":
-                reactants_str = reactants_str + " + __?__"
+                reactants_str = reactants_str + " + " + "_"*len(blanked)
             else:
-                reactants_str = "__?__"
+                reactants_str = "_"*len(blanked)
 
-            products_str = " + ".join(list(map(unparser, products_)))
+            products_str = " + ".join(list(map(unparser_no_bs, products)))
             reaction = reactants_str + " --> " + products_str
 
     
     back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
-    reaction_surface = text_font_3.render(reaction, False, 'white')
+    reaction_surface = text_font_3.render(reaction, False, 'brown2')
     score_surface = text_font_3.render(f'Score: {score}',False, 'white')
     game_surface = pygame.Surface((770,400), pygame.SRCALPHA)
 
@@ -246,7 +249,7 @@ def game():
     pygame.draw.rect(game_surface, (255, 255, 255, 200), (0,0, 770, 400), border_radius=15)
 
     if spawn:
-        b.spawn_babloo(['H','O','N','C'])
+        b.spawn_babloo(atoms,weights)
         spawn=False
     
     
@@ -300,6 +303,7 @@ reaction_shown = False
 reaction = ""
 collected_string = ""
 atoms = []
+weights = []
 blanked = ""
 
 state = GAME
