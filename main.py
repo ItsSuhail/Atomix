@@ -10,6 +10,7 @@ pygame.mixer.init()
 
 screen = pygame.display.set_mode((900, 500)) # Size of the window
 pygame.display.set_caption('Atomix') # Title of the game
+pygame.display.set_icon(pygame.image.load("assets/images/logo.png"))
 pygame.mouse.set_visible(False)
 
 class Babloo:
@@ -457,7 +458,7 @@ outside = False
 chosen = ""
 
 fps = 60
-pygame.time.set_timer(pygame.USEREVENT, 300)
+pygame.time.set_timer(pygame.USEREVENT, 350)
 
 while (True):
 
