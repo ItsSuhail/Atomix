@@ -1,5 +1,7 @@
 import pygame
 import random
+from essentials.random_reaction import *
+from essentials.parse import *
 from sys import exit
 
 pygame.init()
@@ -185,8 +187,53 @@ def game_choose():
 
 b = BablooManagement(radius=25, font=text_font_3, text_color=(255,255,255), babloo_color=(25, 200, 25))
 def game():
-    global b,spawn
+    global b, spawn, score, reaction_shown, reaction, collected_string, blanked
+
+    if not reaction_shown:
+        reaction_shown = True
+        reaction_dict = random_reaction()
+        reactants = reaction_dict['reactants']
+        products = reaction_dict['products']
+        unblankables = reaction_dict['unblankables']
+        ele_symbols = reaction_dict['ele_symbols']
+        
+        if random.choice([-1,1]) == 1:
+            choice = random.choice(products)
+            while (choice in unblankables):
+                choice = random.choice(products)
+            blanked = unparser(choice)
+            products_ = products.copy()
+            products_.remove(choice)
+
+            reactants_str = " + ".join(list(map(unparser, reactants)))
+            products_str = " + ".join(list(map(unparser, products_)))
+            if products_str != '':
+                products_str = products_str + " + __?__"
+            else:
+                products_str = "__?__"
+            reaction = reactants_str + " --> " + products_str
+
+        else:
+            choice = random.choice(reactants)
+            while (choice in unblankables):
+                choice = random.choice(reactants)
+            blanked = unparser(choice)
+            reactants_ = reactants.copy()
+            reactants_.remove(choice)
+
+            reactants_str = " + ".join(list(map(unparser, reactants_)))
+            if reactants_str != "":
+                reactants_str = reactants_str + " + __?__"
+            else:
+                reactants_str = "__?__"
+
+            products_str = " + ".join(list(map(unparser, products_)))
+            reaction = reactants_str + " --> " + products_str
+
+    
     back_surface_1 = text_font_2_sm.render('BACK', False, 'brown2')
+    reaction_surface = text_font_3.render(reaction, False, 'white')
+    score_surface = text_font_3.render(f'Score: {score}',False, 'white')
     game_surface = pygame.Surface((770,400), pygame.SRCALPHA)
 
     if back_rect_1.collidepoint(pygame.mouse.get_pos()):
@@ -195,19 +242,24 @@ def game():
 
     screen.blit(background_menu_surface, (0,0))
     screen.blit(back_surface_1, (10,5))
-
+    screen.blit(reaction_surface, (150, 5))
     pygame.draw.rect(game_surface, (255, 255, 255, 200), (0,0, 770, 400), border_radius=15)
+
     if spawn:
         b.spawn_babloo(['H','O','N','C'])
         spawn=False
+    
+    
     b.draw(game_surface,random.random()*(random.choice([-2,2])), 4+random.random())
-    screen.blit(game_surface, (65,50))
 
+    screen.blit(game_surface, (65,50))
 
     #Custom cursor
     mouse_x,mouse_y = pygame.mouse.get_pos()[0], 300
+    
     big_flask_rect.center = (mouse_x,mouse_y+50)
     screen.blit(big_flask,big_flask_rect)
+    screen.blit(score_surface, (200, 450))
     # pygame.mouse.set_visible(True)
     # print(pygame.mouse.get_pos())
 
@@ -218,7 +270,6 @@ def about():
     developedby_surface = text_font_3.render('Developed by: Suhail Hasan and Audad Ahmed', False, "white")
     databasemanagement_surface = text_font_3.render('Database managed by: Audad Ahmed', False, "white")
     gameidea_surface = text_font_3.render('Game Idea by: Suhail Hasan', False, "white")
-    
     
 
     if back_rect_1.collidepoint(pygame.mouse.get_pos()):
@@ -243,10 +294,19 @@ def about():
     # print(pygame.mouse.get_pos())
 
 
+
+score = 0
+reaction_shown = False
+reaction = ""
+collected_string = ""
+atoms = []
+blanked = ""
+
 state = GAME
 
-fps = 60
+fps = 120
 pygame.time.set_timer(pygame.USEREVENT, 700)
+
 while (True):
 
     if state == MENU:
