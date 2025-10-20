@@ -191,7 +191,7 @@ def game():
 
     if not reaction_shown:
         reaction_shown = True
-        reaction_dict = random_reaction()
+        reaction_dict = random_reaction(12)
         reactants = reaction_dict['reactants']
         products = reaction_dict['products']
         unblankables = reaction_dict['unblankables']
