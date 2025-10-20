@@ -38,10 +38,18 @@ class Babloo:
     def get_coords(self):
         return (self.x,self.y)
 
-    def draw(self, screen, append_x=0, append_y=0):
-        self.x += append_x # Speed along x
-        self.y += append_y # Speed along y
+    def get_screen_coords(self):
+        return (self.x+65, self.y+50)
+    
+    def get_game_surface_coords(self,x,y):
+        return (x-65, y-50)
 
+    def distance_from_mouse(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        babloo_x,babloo_y = self.get_screen_coords()
+        return ((mouse_x-babloo_x)**2 + (mouse_y-babloo_y)**2)**.5
+
+    def draw(self, screen, append_x=0, append_y=0):
         self.surface = pygame.Surface((self.surface_size, self.surface_size), pygame.SRCALPHA)
 
         # The rect of the surface (positioned so that (x, y) is at the center of the babloo on the game surface)
@@ -57,6 +65,9 @@ class Babloo:
         text_rect = text_surface.get_rect(center=center_in_surface)
         self.surface.blit(text_surface, text_rect)
         screen.blit(self.surface, self.rect)
+
+        self.x += append_x # Speed along x
+        self.y += append_y # Speed along y
 
 class BablooManagement:
     possible_x = [55, 130, 205, 280, 355, 405, 505, 580, 655]
@@ -78,14 +89,9 @@ class BablooManagement:
     def draw(self, screen,append_x, append_y):
         pygame.mouse.set_visible(True)
         for babloo,index in zip(self.babloos,range(0,len(self.babloos))):
-            babloo_x,babloo_y = babloo.get_coords()
-            # pygame.mouse.set_pos(babloo_x,babloo_y)
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            x,y = (abs(abs(babloo_x-mouse_x)-60), abs(abs(babloo_y-mouse_y)-60))
-            
             if babloo.get_coords()[1] > 400:
                 del self.babloos[index]
-            elif (x**2 + y**2)**.5 <= 25:
+            elif babloo.distance_from_mouse() <= 25:
                 del self.babloos[index]
             else:
                 babloo.draw(screen, append_x, append_y)
@@ -178,9 +184,6 @@ def game_choose():
     screen.blit(cursor_image,cursor_rect)
     # print(pygame.mouse.get_pos())
 
-# b1 = Babloo(random.randint(25,700), -20, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
-# b2 = Babloo(random.randint(25,700), 5, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
-# b3 = Babloo(random.randint(25,700), 15, 25, "C", text_font_3, (255,255,255), (25, 200, 25))
 b = BablooManagement(radius=25, font=text_font_3, text_color=(255,255,255), babloo_color=(25, 200, 25))
 def game():
     global b,spawn
@@ -198,13 +201,13 @@ def game():
     if spawn:
         b.spawn_babloo(['H','O','N','C'])
         spawn=False
-    b.draw(game_surface,random.random()*(random.choice([-2,2])), 3)
-    # pygame.draw.circle(game_surface, (0,255,255), (x, y), 25)
+    b.draw(game_surface,random.random()*(random.choice([-2,2])), 4+random.random())
     screen.blit(game_surface, (65,50))
 
 
     #Custom cursor
-    big_flask_rect.center = pygame.mouse.get_pos()
+    mouse_x,mouse_y = pygame.mouse.get_pos()
+    big_flask_rect.center = (mouse_x,mouse_y+50)
     screen.blit(big_flask,big_flask_rect)
     # pygame.mouse.set_visible(True)
     # print(pygame.mouse.get_pos())
@@ -295,8 +298,8 @@ while (True):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 if back_rect_1.collidepoint(pygame.mouse.get_pos()):
-                    state = MENU
-                
+                    state = MENU                
+
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
