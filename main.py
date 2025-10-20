@@ -531,7 +531,9 @@ while (True):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 if back_rect_1.collidepoint(pygame.mouse.get_pos()):
-                    state = MENU
+                    click_sound.play()
+
+                    state = PLAY
                     reset()            
 
             if event.type == pygame.QUIT:
