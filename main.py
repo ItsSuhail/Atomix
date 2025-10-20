@@ -45,7 +45,7 @@ class Babloo:
         return (x-65, y-50)
 
     def distance_from_mouse(self):
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+        mouse_x, mouse_y = pygame.mouse.get_pos()[0], 300
         babloo_x,babloo_y = self.get_screen_coords()
         return ((mouse_x-babloo_x)**2 + (mouse_y-babloo_y)**2)**.5
 
@@ -87,7 +87,6 @@ class BablooManagement:
         self.babloos.append(babloo_spawn)
 
     def draw(self, screen,append_x, append_y):
-        pygame.mouse.set_visible(True)
         for babloo,index in zip(self.babloos,range(0,len(self.babloos))):
             if babloo.get_coords()[1] > 400:
                 del self.babloos[index]
@@ -206,7 +205,7 @@ def game():
 
 
     #Custom cursor
-    mouse_x,mouse_y = pygame.mouse.get_pos()
+    mouse_x,mouse_y = pygame.mouse.get_pos()[0], 300
     big_flask_rect.center = (mouse_x,mouse_y+50)
     screen.blit(big_flask,big_flask_rect)
     # pygame.mouse.set_visible(True)
@@ -247,7 +246,7 @@ def about():
 state = GAME
 
 fps = 60
-pygame.time.set_timer(pygame.USEREVENT, 1000)
+pygame.time.set_timer(pygame.USEREVENT, 700)
 while (True):
 
     if state == MENU:
