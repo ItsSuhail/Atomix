@@ -3,26 +3,26 @@ from parse import parser
 
 # Add compounds to the db with their parsed formula
 def add_compound():
+  # Establish db connection
   conn = connect('atomix.db')
   cursor = conn.cursor()
 
   while True:
     formula = input('Enter formula (q to quit): ')
-    if formula.lower() == 'q': break
-    # iupac = input('IUPAC Name: ')
+    if formula.lower() == 'q': break # Exit case
 
     try:
       parsed = parser(formula)
-      print(parsed)
 
       cursor.execute(f'''
         INSERT INTO compounds (formula)
         VALUES (?);
       ''', [parsed])
 
-    except IntegrityError:
+    except IntegrityError: # Throws exception if compound already exists
       print('Compound already added.')
 
+    # For any other exception, commit and close to save progress and prevent memory leak
     except Exception as e:
       conn.commit()
       conn.close()

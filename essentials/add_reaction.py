@@ -1,13 +1,15 @@
 from sqlite3 import connect, IntegrityError
 from parse import parser
 
+# Add reaction
 def add_reaction():
+  # Establish db connection
   conn = connect('atomix.db')
   cursor = conn.cursor()
 
   # Per reaction
   while True:
-    if input('Another one? (y/n): ').lower() == 'n': break
+    if input('Another one? (y/n): ').lower() == 'n': break # Exit case
 
     # Create new reaction and get its ID
     cursor.execute('INSERT INTO reactions (grade) VALUES (\'11\')')
@@ -29,7 +31,7 @@ def add_reaction():
       try:
         cursor.execute('INSERT INTO compounds (formula) VALUES (?)', [parser(r)])
         print('compound added\n')
-      except IntegrityError: pass
+      except IntegrityError: pass # If compound already exists
 
       # Add compound to junction table
       cursor.execute('''
@@ -52,7 +54,7 @@ def add_reaction():
       try:
         cursor.execute('INSERT INTO compounds (formula) VALUES (?)', [parser(r)])
         print('compound added\n')
-      except IntegrityError: pass
+      except IntegrityError: pass # If compound already exists
 
       # Add compound to junction table
       cursor.execute('''

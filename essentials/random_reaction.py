@@ -4,7 +4,7 @@ import random
 
 def random_reaction(grade):
   """
-    Fetches a random reaction
+    Fetches a random reaction of the given grade
 
     Args:
       grade: Reactions from which grade (11/12/C)
@@ -12,12 +12,14 @@ def random_reaction(grade):
     Returns:
       dict: products, reactants and unblankables
   """
-  if grade == "C":
+  if grade == 'C':
     grade = random.choice([11,12])
 
+  # Establish db connection
   conn = connect('atomix.db')
   cursor = conn.cursor()
 
+  # Fetch 1 reaction of 'grade' randomly
   cursor.execute(f'SELECT id FROM reactions WHERE grade = {grade} ORDER BY random() LIMIT 1')
   reaction_id = cursor.fetchone()[0]
 
@@ -31,6 +33,7 @@ def random_reaction(grade):
 
   for ind, compound in enumerate(compounds):
     formula = compound[5]
+
     if compound[3] == 'product':
       products.append(formula)
     
