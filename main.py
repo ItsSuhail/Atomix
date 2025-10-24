@@ -280,6 +280,8 @@ def game():
             
             blanked_string = "_"*len(blanked)
         else:
+            is_product = False
+            
             choice = random.choice(reactants)
             while (choice in unblankables):
                 choice = random.choice(reactants)
