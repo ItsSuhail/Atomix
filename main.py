@@ -3,15 +3,30 @@ import random
 from essentials.random_reaction import *
 from essentials.parse import *
 from sys import exit
+import os
+import sys
+
+# When executable is created, this function transforms the relative path to the new path where the assets are located
+def create_path(relative_path):
+    path: str
+    if hasattr(sys, '_MEIPASS'):
+        path = os.path.join(sys._MEIPASS, relative_path)
+    else:
+        path = os.path.join(os.path.abspath('.'), relative_path)
+    return path
 
 
 pygame.init()
-pygame.mixer.init()
+try:
+    pygame.mixer.init()
+except Exception as e:
+    pass
 
 screen = pygame.display.set_mode((900, 500)) # Size of the window
 pygame.display.set_caption('Atomix') # Title of the game
-pygame.display.set_icon(pygame.image.load("assets/images/logo.png"))
+pygame.display.set_icon(pygame.image.load(create_path("assets/images/logo.png")))
 pygame.mouse.set_visible(False)
+
 
 class Babloo:
     def __init__(self, x, y, radius, text, font, text_color=(0, 0, 0), babloo_color=(173, 216, 230)):
@@ -108,20 +123,35 @@ class BablooManagement:
             else:
                 babloo.draw(screen, append_x, append_y)
 
+class Awaaz():
+    def __init__(self, relative_path):
+        self.relative_path = relative_path
+        self.path = create_path(relative_path)
+        try:
+            self.sound = pygame.mixer.Sound(self.path)
+        except Exception as e:
+            self.sound = None
+    
+    def play(self):
+        if self.sound:
+            self.sound.play()
             
 
 # Loading sound effects
-reaction_complete_sound = pygame.mixer.Sound("assets/sounds/reaction_complete.wav")
-successful_collection_sound = pygame.mixer.Sound("assets/sounds/successful_collection.wav")
-wrong_answer_sound = pygame.mixer.Sound("assets/sounds/wrong_answer.wav")
-click_sound = pygame.mixer.Sound("assets/sounds/click.wav")
+reaction_complete_sound = Awaaz("assets/sounds/reaction_complete.wav")
+successful_collection_sound = Awaaz("assets/sounds/successful_collection.wav")
+wrong_answer_sound = Awaaz("assets/sounds/wrong_answer.wav")
+click_sound = Awaaz("assets/sounds/click.wav")
 
-# Loading background music
-pygame.mixer.music.load('assets/sounds/bg_music.mp3')
-# Setting the volume
-pygame.mixer.music.set_volume(0.3)
-# Playing the music
-pygame.mixer.music.play(-1)
+try:
+    # Loading background music
+    pygame.mixer.music.load(create_path('assets/sounds/bg_music.mp3'))
+    # Setting the volume
+    pygame.mixer.music.set_volume(0.3)
+    # Playing the music
+    pygame.mixer.music.play(-1)
+except Exception as e:
+    pass
 
 # Game states
 MENU = "menu" #initial state
@@ -133,30 +163,30 @@ GAME = "game"
 state = MENU
 
 # Initializing fonts
-text_font_1 = pygame.font.Font('assets/fonts/font1.ttf',60)
-text_font_2 = pygame.font.Font('assets/fonts/font2.ttf',60)
-text_font_2_reg = pygame.font.Font('assets/fonts/font2.ttf',40)
-text_font_2_sm = pygame.font.Font('assets/fonts/font2.ttf',25)
-text_font_3 = pygame.font.Font('assets/fonts/RobotoSlab-SemiBold.ttf', 28)
-text_font_3_sm = pygame.font.Font('assets/fonts/RobotoSlab-SemiBold.ttf', 23)
+text_font_1 = pygame.font.Font(create_path('assets/fonts/font1.ttf'),60)
+text_font_2 = pygame.font.Font(create_path('assets/fonts/font2.ttf'),60)
+text_font_2_reg = pygame.font.Font(create_path('assets/fonts/font2.ttf'),40)
+text_font_2_sm = pygame.font.Font(create_path('assets/fonts/font2.ttf'),25)
+text_font_3 = pygame.font.Font(create_path('assets/fonts/RobotoSlab-SemiBold.ttf'), 28)
+text_font_3_sm = pygame.font.Font(create_path('assets/fonts/RobotoSlab-SemiBold.ttf'), 23)
 
 # Clock
 clock = pygame.time.Clock()
 
 # Defining surfaces
-background_menu_surface = pygame.image.load('assets/images/bgb.png')
-cursor_image = pygame.image.load('assets/images/flask.png')
+background_menu_surface = pygame.image.load(create_path('assets/images/bgb.png'))
+cursor_image = pygame.image.load(create_path('assets/images/flask.png'))
 cursor_image = pygame.transform.scale(cursor_image, (32,32))
-big_flask = pygame.image.load('assets/images/bigflask.png')
+big_flask = pygame.image.load(create_path('assets/images/bigflask.png'))
 big_flask = pygame.transform.scale(big_flask, (95,120))
-rick_surface = pygame.image.load('assets/images/rick.png')
-rick_morty_surface = pygame.image.load('assets/images/rickmorty.png')
+rick_surface = pygame.image.load(create_path('assets/images/rick.png'))
+rick_morty_surface = pygame.image.load(create_path('assets/images/rickmorty.png'))
 title_surface = text_font_2.render('ATOMIX', False, 'white')
 credit_surface = text_font_2.render('CREDITS', False, 'white')
 
-image1 = pygame.transform.scale(pygame.image.load('assets/images/img1.png'),(325,325))
-image2 = pygame.transform.scale(pygame.image.load('assets/images/img2.png'),(300,300))
-image3 = pygame.transform.scale(pygame.image.load('assets/images/img3.png'),(600,450))
+image1 = pygame.transform.scale(pygame.image.load(create_path('assets/images/img1.png')),(325,325))
+image2 = pygame.transform.scale(pygame.image.load(create_path('assets/images/img2.png')),(300,300))
+image3 = pygame.transform.scale(pygame.image.load(create_path('assets/images/img3.png')),(600,450))
 
 ## Rectangles
 
